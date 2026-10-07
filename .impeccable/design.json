@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T00:00:00Z",
+  "title": "Design System: Job Tracker",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "System Blue", "canonical": "#0b63ce", "tonalRamp": ["#04213f", "#073566", "#0a4a90", "#0b63ce", "#3c86e0", "#74a9ea", "#aecbf3", "#e2edfb"] },
+      "primary-dark": { "role": "primary", "displayName": "System Blue (dark)", "canonical": "#4d9bff" },
+      "backdrop": { "role": "neutral", "displayName": "Cool Mist", "canonical": "#dde3eb", "tonalRamp": ["#0e131c", "#232b38", "#3e4858", "#5f6a7c", "#8792a3", "#b2bac6", "#dde3eb", "#f3f5f8"] },
+      "backdrop-dark": { "role": "neutral", "displayName": "Night Mist", "canonical": "#0e131c" },
+      "ink": { "role": "neutral", "displayName": "Deep Ink", "canonical": "#0f1726" },
+      "ink-2": { "role": "neutral", "displayName": "Slate Ink", "canonical": "#444e60" },
+      "ink-3": { "role": "neutral", "displayName": "Quiet Ink", "canonical": "#5c6577" },
+      "glass": { "role": "neutral", "displayName": "Frost", "canonical": "rgba(255, 255, 255, 0.52)" },
+      "glass-strong": { "role": "neutral", "displayName": "Dense Frost", "canonical": "rgba(247, 249, 252, 0.9)" },
+      "surface": { "role": "neutral", "displayName": "Card Surface", "canonical": "rgba(255, 255, 255, 0.82)" },
+      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "rgba(15, 23, 38, 0.09)" },
+      "error": { "role": "semantic", "displayName": "Error Red", "canonical": "#be123c", "tonalRamp": ["#3d0614", "#640a21", "#8f0f2f", "#be123c", "#d6496a", "#e57f97", "#f1b4c2", "#fbe5ea"] },
+      "tone-good": { "role": "semantic", "displayName": "Score Good (figure only)", "canonical": "#047857" },
+      "tone-ok": { "role": "semantic", "displayName": "Score Fair (figure only)", "canonical": "#a16207" },
+      "status-saved": { "role": "semantic", "displayName": "Saved dot", "canonical": "#64748b" },
+      "status-applied": { "role": "semantic", "displayName": "Applied dot", "canonical": "#0ea5e9" },
+      "status-screening": { "role": "semantic", "displayName": "Screening dot", "canonical": "#8b5cf6" },
+      "status-interviewing": { "role": "semantic", "displayName": "Interviewing dot", "canonical": "#f59e0b" },
+      "status-offer": { "role": "semantic", "displayName": "Offer dot", "canonical": "#10b981" },
+      "status-rejected": { "role": "semantic", "displayName": "Rejected dot", "canonical": "#f43f5e" },
+      "paper": { "role": "neutral", "displayName": "Resume Paper", "canonical": "#ffffff" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The auth intro headline only." },
+      "figure": { "displayName": "Score Figure", "purpose": "The 48px analysis score; the only toned type." },
+      "headline": { "displayName": "Headline", "purpose": "Auth and onboarding card headings." },
+      "title": { "displayName": "Title", "purpose": "Sheet titles." },
+      "card-title": { "displayName": "Card Title", "purpose": "Job titles on cards." },
+      "body": { "displayName": "Body", "purpose": "Base text, 14px / 1.45." },
+      "label": { "displayName": "Label", "purpose": "Form labels, counts, secondary meta." },
+      "mono": { "displayName": "Mono", "purpose": "Markdown editor and placeholder codes." },
+      "paper": { "displayName": "Paper", "purpose": "Resume preview; mirrors the pdfkit PDF." }
+    },
+    "shadows": [
+      { "name": "pane", "value": "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 1px rgba(15,23,38,0.04), 0 10px 30px -14px rgba(15,23,38,0.22)", "purpose": "Top bar, lanes, auth card: edge highlight plus soft drop." },
+      { "name": "rest", "value": "0 1px 1px rgba(15,23,38,0.05)", "purpose": "Cards at rest." },
+      { "name": "lift", "value": "0 2px 4px rgba(15,23,38,0.08), 0 22px 44px -16px rgba(15,23,38,0.35)", "purpose": "The dragged card only." },
+      { "name": "segment", "value": "0 1px 2px rgba(15,23,38,0.14)", "purpose": "Active segment in segmented controls." },
+      { "name": "paper", "value": "0 1px 2px rgba(0,0,0,0.08), 0 16px 36px -20px rgba(15,23,38,0.45)", "purpose": "Resume paper." },
+      { "name": "blur-pane", "value": "blur(24px) saturate(140%)", "purpose": "backdrop-filter for panes and lanes; write unprefixed only." },
+      { "name": "blur-sheet", "value": "blur(44px) saturate(140%)", "purpose": "backdrop-filter for the side sheet." },
+      { "name": "blur-drag", "value": "blur(18px) saturate(160%)", "purpose": "backdrop-filter for the dragged card." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Presses (scale 0.97 buttons, 0.94 icons, 0.985 cards), 160ms." },
+      { "name": "ease-drawer", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Sheet slide-in from 28px, 320ms; the longest motion allowed." },
+      { "name": "state", "value": "150ms ease", "purpose": "Colour and border transitions." },
+      { "name": "drop-target", "value": "200ms ease", "purpose": "Lane glass swap to glass-strong while dragged over." }
+    ],
+    "breakpoints": [
+      { "name": "aside-stack", "value": "1100px" },
+      { "name": "single-column", "value": "860px" },
+      { "name": "mobile", "value": "720px" },
+      { "name": "narrow", "value": "420px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "System Blue fill; one per view, for the action that moves the user forward.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg>New application</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; font: 550 13px -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-btn-primary { background: var(--accent, #0b63ce); color: var(--accent-ink, #fff); border: 1px solid transparent; } .ds-btn-primary:hover { background: var(--accent-hover, #0a56b3); } .ds-btn:active { transform: scale(0.97); } .ds-btn:focus-visible { outline: 2px solid var(--accent, #0b63ce); outline-offset: 2px; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Quiet translucent button with a hairline; every non-primary action.",
+      "html": "<button class=\"ds-btn-default\">My resume</button>",
+      "css": ".ds-btn-default { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line, rgba(15,23,38,0.09)); background: var(--btn-bg, rgba(255,255,255,0.72)); color: var(--ink, #0f1726); font: 550 13px -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-btn-default:hover { background: var(--btn-bg-hover, #fff); border-color: var(--line-strong, rgba(15,23,38,0.16)); } .ds-btn-default:active { transform: scale(0.97); } .ds-btn-default:focus-visible { outline: 2px solid var(--accent, #0b63ce); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Translucent field, blue border and 3px halo on focus.",
+      "html": "<input class=\"ds-input\" placeholder=\"Company\" />",
+      "css": ".ds-input { width: 240px; height: 34px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line-strong, rgba(15,23,38,0.16)); background: var(--input-bg, rgba(255,255,255,0.8)); color: var(--ink, #0f1726); font: 400 13.5px -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; caret-color: var(--accent, #0b63ce); transition: border-color 150ms ease, box-shadow 150ms ease; } .ds-input::placeholder { color: var(--ink-3, #5c6577); } .ds-input:focus { outline: none; border-color: var(--accent, #0b63ce); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #0b63ce) 20%, transparent); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented",
+      "description": "Shared track for the theme switch and the sheet tabs.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-on\">Analysis</button><button>Tailored resume</button><button>Details</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--seg-bg, rgba(15,23,38,0.06)); } .ds-seg button { height: 28px; padding: 0 12px; border: 0; border-radius: 6px; background: none; color: var(--ink-3, #5c6577); font: 550 13px -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; } .ds-seg button:hover { color: var(--ink, #0f1726); } .ds-seg .ds-seg-on { background: var(--seg-active, #fff); color: var(--ink, #0f1726); box-shadow: 0 1px 2px rgba(15,23,38,0.14); } .ds-seg button:focus-visible { outline: 2px solid var(--accent, #0b63ce); outline-offset: 2px; }"
+    },
+    {
+      "name": "Job Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Title, company, one foot line: score number and a single state; blue only when it needs the user.",
+      "html": "<article class=\"ds-card\"><h3>Backend Engineer</h3><p class=\"ds-co\">Swiggy</p><div class=\"ds-foot\"><span class=\"ds-score\">90</span><span class=\"ds-state\">2 to fill</span></div></article>",
+      "css": ".ds-card { width: 220px; padding: 10px 12px; border-radius: 10px; background: var(--surface, rgba(255,255,255,0.82)); border: 1px solid var(--line, rgba(15,23,38,0.09)); box-shadow: 0 1px 1px rgba(15,23,38,0.05); font-family: -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; color: var(--ink, #0f1726); cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-card:hover { background: var(--surface-hover, #fff); border-color: var(--line-strong, rgba(15,23,38,0.16)); } .ds-card:active { transform: scale(0.985); } .ds-card h3 { margin: 0; font-size: 13.5px; font-weight: 600; line-height: 1.3; } .ds-co { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2, #444e60); } .ds-foot { display: flex; align-items: center; gap: 10px; margin-top: 8px; min-height: 24px; } .ds-score { font-size: 12.5px; font-weight: 600; color: var(--ink-2, #444e60); font-variant-numeric: tabular-nums; } .ds-state { font-size: 12px; font-weight: 550; color: var(--accent, #0b63ce); }"
+    },
+    {
+      "name": "Glass Lane",
+      "kind": "custom",
+      "refersTo": "lane",
+      "description": "Neutral frosted lane; glass on ::before so the lane has no stacking context; 7px status dot.",
+      "html": "<section class=\"ds-lane\"><header class=\"ds-lane-head\"><span class=\"ds-dot\"></span><h2>Applied</h2><span class=\"ds-count\">2</span></header></section>",
+      "css": ".ds-lane { position: relative; width: 240px; min-height: 160px; border-radius: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; } .ds-lane::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--glass, rgba(255,255,255,0.52)); backdrop-filter: blur(24px) saturate(140%); border: 1px solid var(--glass-border, rgba(255,255,255,0.65)); box-shadow: inset 0 1px 0 var(--edge, rgba(255,255,255,0.9)), 0 1px 1px rgba(15,23,38,0.04), 0 10px 30px -14px rgba(15,23,38,0.22); transition: background-color 200ms ease; } .ds-lane:hover::before { background: var(--glass-strong, rgba(247,249,252,0.9)); } .ds-lane-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px 8px; } .ds-dot { width: 7px; height: 7px; border-radius: 999px; background: #0ea5e9; } .ds-lane-head h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink, #0f1726); } .ds-count { font-size: 12.5px; color: var(--ink-3, #5c6577); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Keyword Tag",
+      "kind": "chip",
+      "refersTo": "keyword-tag",
+      "description": "Neutral 6px tag; matched keywords get a blue check.",
+      "html": "<span class=\"ds-kw\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M5 12l5 5L20 7\"/></svg>Kafka</span>",
+      "css": ".ds-kw { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 6px; font: 550 12px -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; color: var(--ink-2, #444e60); background: var(--chip-bg, rgba(15,23,38,0.06)); } .ds-kw svg { color: var(--accent, #0b63ce); }"
+    },
+    {
+      "name": "Score Figure",
+      "kind": "custom",
+      "refersTo": "figure",
+      "description": "The only toned type: 48px score in the analysis sheet, good/ok/low by threshold.",
+      "html": "<p class=\"ds-figure\"><strong>84</strong><span>/100</span></p>",
+      "css": ".ds-figure { display: flex; align-items: baseline; gap: 2px; margin: 0; color: var(--good, #047857); font-family: -apple-system, BlinkMacSystemFont, 'Mona Sans Variable', system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-figure strong { font-size: 48px; line-height: 1; font-weight: 650; letter-spacing: -0.04em; } .ds-figure span { font-size: 15px; font-weight: 500; color: var(--ink-3, #5c6577); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Refined Glass",
+    "overview": "A professional tool, not a showpiece. The board has Linear's density and the material polish of macOS and visionOS. Glass is what the chrome is made of: a floating top bar, six full-height lanes and a side sheet. Each is a neutral frosted pane over one cool, single-tone backdrop lit softly from above. Colour is reserved for the things that need the user. Everything else stays in three greys of ink.\n\nThe system replaces an earlier \"status is light\" world (lanes tinted in rainbow hues, light pools behind each lane, an ink-coloured primary pill), which the user rejected as looking vibecoded. Nothing from that world survives except the brand mark. Neither theme is secondary: light and dark are both full token sets, chosen by a System/Light/Dark switch. An inline script in `index.html` applies the choice before first paint.",
+    "keyCharacteristics": [
+      "One cool backdrop (light #dde3eb, dark #0e131c) with a single radial light from above the viewport.",
+      "Neutral frosted panes (blur 24px, saturate 140%), each with a 1px top edge highlight.",
+      "One accent, system blue. Red marks failures. Hue appears nowhere else.",
+      "Status is shown by a 7px dot. Lanes are never tinted.",
+      "Hairline dividers, not nested cards.",
+      "Radius scale of 14 / 10 / 8 / 6.",
+      "The resume renders as white Helvetica paper in both themes."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Blue means \"act here\" or \"this is live\". Never use it for decoration, headings or idle state.", "section": "colors" },
+      { "name": "The Spent-Only-Where-Needed Rule", "body": "Tone colours belong to the score figure, status hues belong to the dot, and red belongs to failures. If a hue appears anywhere else, it is a defect.", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "Counts, scores and tallies always use `font-variant-numeric: tabular-nums`.", "section": "typography" },
+      { "name": "The Lifted Pane Rule", "body": "This is the signature interaction. A card being dragged turns into its own glass pane (`glass`, `blur(18px) saturate(160%)`, Lift shadow, scale 1.02) and floats over the board.", "section": "elevation" },
+      { "name": "The Unstacked Lane Rule", "body": "The lane's glass lives on a `::before` layer at `z-index: -1`. The lane itself must never create a stacking context: no `z-index`, `transform`, `filter`, `opacity < 1` or `backdrop-filter` on it. Otherwise the fixed-position dragged card gets trapped in the lane or painted under later lanes.", "section": "elevation" },
+      { "name": "The Fallback Rule", "body": "When reduced transparency is requested, `--glass` falls back to `--glass-strong` and backdrop blur is removed from panes, lanes and the dragged card. When `backdrop-filter` is unsupported, `--glass` also becomes `--glass-strong`. The glass must still read as solid surfaces in both cases.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do spend System Blue only on primary actions, \"needs you\" or live states, focus and selection.",
+      "Do keep lanes neutral and show status only with the 7px dot.",
+      "Do separate sections inside sheets with 1px hairlines (`line`).",
+      "Do follow the 14 / 10 / 8 / 6 radius nesting.",
+      "Do keep the lane glass on `::before` and leave `.lane` without a stacking context.",
+      "Do swap the drop-target lane to `glass-strong`, and fall back to `glass-strong` under reduced transparency or without backdrop-filter support.",
+      "Do write only the unprefixed `backdrop-filter`. The build's lightningcss pass adds `-webkit-backdrop-filter` itself.",
+      "Do keep motion at 320ms or less. Presses scale and reduced motion removes movement.",
+      "Do render the resume as white Helvetica paper that matches the PDF, in both themes."
+    ],
+    "donts": [
+      "Don't tint lanes or cards by status, and don't place light pools behind lanes. That was the rejected \"status is light\" world.",
+      "Don't put tone colours anywhere but the analysis score figure.",
+      "Don't use red for anything but failures, destructive actions and the analysis's red flags.",
+      "Don't nest cards or boxed panels inside a sheet.",
+      "Don't hand-write `-webkit-backdrop-filter`. When both were written by hand, the lightningcss minifier dropped the unprefixed declaration.",
+      "Don't put `backdrop-filter` on the scrim, because it kills the sheet's blur.",
+      "Don't give a card more than one state line."
+    ]
+  }
+}

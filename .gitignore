@@ -1,0 +1,12 @@
+node_modules/
+dist/
+server/data/
+.env
+
+# Local AI tooling and design-review captures
+.agents/
+.claude/
+skills-lock.json
+.impeccable/review/
+.impeccable/live/
+**/hook.cache.json

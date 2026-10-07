@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#dde3eb" />
+    <script>
+      // Apply the saved theme before first paint to avoid a light flash in dark mode.
+      (function () {
+        var pref; try { pref = localStorage.getItem('theme'); } catch (e) {}
+        var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='1' y='1' width='26' height='26' rx='8' fill='%230f1726'/%3E%3Crect x='7' y='7' width='3.5' height='14' rx='1.75' fill='%23fff'/%3E%3Crect x='12.25' y='7' width='3.5' height='9' rx='1.75' fill='%23fff'/%3E%3Crect x='17.5' y='7' width='3.5' height='11.5' rx='1.75' fill='%230b63ce'/%3E%3C/svg%3E" />
+    <title>Job Tracker</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
