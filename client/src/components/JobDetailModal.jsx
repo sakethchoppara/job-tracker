@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { STATUSES, api } from '../api.js';
 import { AiStatus } from './JobCard.jsx';
 import Modal from './Modal.jsx';
+import PageEditor from './PageEditor.jsx';
 import ResumePreview from './ResumePreview.jsx';
 
 const FIELDS = ['title', 'company', 'experience', 'location', 'url', 'description', 'notes'];
@@ -221,7 +222,6 @@ function TailoringNotes({ t }) {
 
 function ResumeTab({ job, onChange, goToAnalysis }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
   const { busy, error, run } = useAction(onChange);
 
   if (job.ai_status === 'processing' && job.ai_stage !== 'analyze') return <Progress job={job} />;
@@ -234,41 +234,121 @@ function ResumeTab({ job, onChange, goToAnalysis }) {
     );
   }
 
+  if (editing) {
+    return (
+      <>
+        {error && <div className="form-error">{error}</div>}
+        <PageEditor
+          markdown={job.tailored_markdown}
+          keywords={(job.analysis?.missing_keywords || []).map((k) => k.keyword)}
+          saving={busy}
+          onSave={(md) => run(async () => { const j = await api.saveTailored(job.id, md); setEditing(false); return j; })}
+          onCancel={() => setEditing(false)}
+        />
+      </>
+    );
+  }
+
   const placeholders = job.tailoring?.placeholders || [];
   return (
     <div className="resume-tab">
       <div className="toolbar">
-        {editing ? (
-          <>
-            <button className="btn primary" disabled={busy} onClick={() => run(async () => { const j = await api.saveTailored(job.id, draft); setEditing(false); return j; })}>Save edits</button>
-            <button className="btn" onClick={() => setEditing(false)}>Cancel</button>
-            <span className="muted small">Format: # Name, ## Section, ### Role — Company, _dates_, - bullet, **bold**</span>
-          </>
-        ) : (
-          <>
+        <>
             <a className="btn primary" href={api.jobResumeUrl(job.id, 'pdf')} download><FileDown size={15} strokeWidth={1.75} />PDF</a>
             <a className="btn" href={api.jobResumeUrl(job.id, 'docx')} download><FileDown size={15} strokeWidth={1.75} />DOCX</a>
             <a className="btn" href={api.jobResumeUrl(job.id, 'md')} download><FileDown size={15} strokeWidth={1.75} />Markdown</a>
             <span className="spacer" />
             {job.tailored_edited && <span className="muted small">Edited by you</span>}
-            <button className="btn" onClick={() => { setDraft(job.tailored_markdown); setEditing(true); }}><PencilLine size={15} strokeWidth={1.75} />Edit</button>
+            <button className="btn" onClick={() => setEditing(true)}><PencilLine size={15} strokeWidth={1.75} />Edit on page</button>
             <button className="btn" onClick={goToAnalysis}><RotateCw size={15} strokeWidth={1.75} />Re-tailor</button>
-          </>
-        )}
+        </>
       </div>
       {placeholders.length > 0 && (
         <div className="notice warn placeholders">
-          <p><strong>Fill {placeholders.length} placeholder{placeholders.length > 1 ? 's' : ''} before sending.</strong> The AI doesn’t invent numbers, so add your real figures with Edit.</p>
+          <p><strong>Fill {placeholders.length} placeholder{placeholders.length > 1 ? 's' : ''} before sending.</strong> The AI doesn’t invent numbers, so add your real figures with Edit on page.</p>
           <div className="code-list">{placeholders.map((p) => <code key={p}>{p}</code>)}</div>
         </div>
       )}
       {error && <div className="form-error">{error}</div>}
       <div className="resume-layout">
-        {editing
-          ? <textarea className="md-editor" aria-label="Tailored resume (Markdown)" value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck />
-          : <ResumePreview markdown={job.tailored_markdown} />}
+        <ResumePreview markdown={job.tailored_markdown} />
         <TailoringNotes t={job.tailoring} />
       </div>
+    </div>
+  );
+}
+
+function CoverLetterTab({ job, hasResume, onChange }) {
+  const [instructions, setInstructions] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const { busy, error, run } = useAction(onChange);
+  const write = () => run(() => api.writeCoverLetter(job.id, instructions));
+
+  if (!hasResume) return <div className="placeholder"><p>Upload your resume with the Upload resume button in the top bar to write a cover letter.</p></div>;
+  if (busy && !editing) {
+    return (
+      <div className="placeholder" role="status" aria-live="polite">
+        <LoaderCircle size={20} strokeWidth={2} className="spin" />
+        <p>Writing your cover letter. This takes about 20 seconds.</p>
+      </div>
+    );
+  }
+
+  const notes = (
+    <textarea rows={2} value={instructions} onChange={(e) => setInstructions(e.target.value)}
+      aria-label="Notes for the cover letter (optional)"
+      placeholder="Notes (optional), e.g. “mention I was referred by Priya” or “keep it under 200 words”" />
+  );
+
+  if (!job.cover_letter) {
+    return (
+      <div className="cover-empty">
+        <p>Write a cover letter from {job.tailored_markdown ? 'your tailored resume' : 'your resume'} and this job description. Nothing about you is invented.</p>
+        {notes}
+        <div className="actions-row">
+          <span className="spacer" />
+          <button className="btn primary" onClick={write}><PencilLine size={15} strokeWidth={1.75} />Write cover letter</button>
+        </div>
+        {error && <div className="form-error">{error}</div>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="resume-tab">
+      <div className="toolbar">
+        {editing ? (
+          <>
+            <button className="btn primary" disabled={busy} onClick={() => run(async () => { const j = await api.saveCoverLetter(job.id, draft); setEditing(false); return j; })}>Save edits</button>
+            <button className="btn" onClick={() => setEditing(false)}>Cancel</button>
+          </>
+        ) : (
+          <>
+            <a className="btn primary" href={api.coverLetterUrl(job.id, 'pdf')} download><FileDown size={15} strokeWidth={1.75} />PDF</a>
+            <a className="btn" href={api.coverLetterUrl(job.id, 'docx')} download><FileDown size={15} strokeWidth={1.75} />DOCX</a>
+            <a className="btn" href={api.coverLetterUrl(job.id, 'txt')} download><FileDown size={15} strokeWidth={1.75} />Text</a>
+            <span className="spacer" />
+            <button className="btn" onClick={() => { setDraft(job.cover_letter); setEditing(true); }}><PencilLine size={15} strokeWidth={1.75} />Edit</button>
+          </>
+        )}
+      </div>
+      {error && <div className="form-error">{error}</div>}
+      {editing
+        ? <textarea className="letter-editor" aria-label="Cover letter" value={draft} onChange={(e) => setDraft(e.target.value)} spellCheck />
+        : <div className="resume-paper letter">{job.cover_letter.split(/\n\s*\n/).map((p, i) => <p key={i}>{p}</p>)}</div>}
+      {!editing && (
+        <div className="accept-box">
+          {notes}
+          <div className="actions-row">
+            <span className="spacer" />
+            <button className="btn" onClick={() => {
+              if (!window.confirm('Replace this cover letter with a new one?')) return;
+              write();
+            }}><RotateCw size={15} strokeWidth={1.75} />Rewrite</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -290,7 +370,7 @@ export default function JobDetailModal({ job, hasResume, onClose, onChange, onDe
     <Modal wide title={job.title} subtitle={job.company} onClose={onClose} headerExtra={statusSelect}>
       <div className="detail-head">
         <div className="tabs" role="tablist" aria-label="Application views">
-          {[['analysis', 'Analysis'], ['resume', 'Tailored resume'], ['details', 'Details']].map(([id, label]) => (
+          {[['analysis', 'Analysis'], ['resume', 'Tailored resume'], ['cover', 'Cover letter'], ['details', 'Details']].map(([id, label]) => (
             <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
@@ -299,6 +379,7 @@ export default function JobDetailModal({ job, hasResume, onClose, onChange, onDe
       </div>
       {tab === 'analysis' && <AnalysisTab job={job} hasResume={hasResume} onChange={onChange} onTailored={() => setTab('resume')} />}
       {tab === 'resume' && <ResumeTab job={job} onChange={onChange} goToAnalysis={() => setTab('analysis')} />}
+      {tab === 'cover' && <CoverLetterTab job={job} hasResume={hasResume} onChange={onChange} />}
       {tab === 'details' && <DetailsTab job={job} onChange={onChange} onDelete={onDelete} />}
     </Modal>
   );

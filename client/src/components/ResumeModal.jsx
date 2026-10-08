@@ -2,6 +2,7 @@ import { FileDown, FileText, PencilLine, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '../api.js';
 import Modal from './Modal.jsx';
+import PageEditor from './PageEditor.jsx';
 import ResumePreview from './ResumePreview.jsx';
 
 export function ImportForm({ onImported, onCancel }) {
@@ -58,15 +59,19 @@ function ParsedSummary({ structured }) {
 
 export default function ResumeModal({ resume, onClose, onSaved }) {
   const [mode, setMode] = useState(resume ? 'view' : 'import');
-  const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const saveEdit = async () => {
+  const saveEdit = async (markdown) => {
+    setSaving(true);
+    setError('');
     try {
-      onSaved(await api.saveResume(draft));
+      onSaved(await api.saveResume(markdown));
       setMode('view');
     } catch (e) {
       setError(e.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -85,7 +90,7 @@ export default function ResumeModal({ resume, onClose, onSaved }) {
             <a className="btn" href={api.baseResumeUrl('pdf')} download><FileDown size={15} strokeWidth={1.75} />Clean PDF</a>
             <a className="btn" href={api.baseResumeUrl('docx')} download><FileDown size={15} strokeWidth={1.75} />DOCX</a>
             <span className="spacer" />
-            <button className="btn" onClick={() => { setDraft(resume.markdown); setMode('edit'); }}><PencilLine size={15} strokeWidth={1.75} />Edit</button>
+            <button className="btn" onClick={() => setMode('edit')}><PencilLine size={15} strokeWidth={1.75} />Edit on page</button>
             <button className="btn primary" onClick={() => setMode('import')}><Upload size={15} strokeWidth={1.75} />Replace PDF</button>
           </div>
           <p className="muted small">
@@ -96,18 +101,10 @@ export default function ResumeModal({ resume, onClose, onSaved }) {
         </div>
       )}
       {mode === 'edit' && (
-        <div className="resume-tab">
-          <div className="toolbar">
-            <button className="btn primary" onClick={saveEdit}>Save</button>
-            <button className="btn" onClick={() => setMode('view')}>Cancel</button>
-            <span className="muted small">Format: # Name, ## Section, ### Role — Company, _dates_, - bullet, **bold**</span>
-          </div>
+        <>
           {error && <div className="form-error">{error}</div>}
-          <div className="resume-layout single">
-            <textarea className="md-editor" aria-label="Base resume (Markdown)" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            <ResumePreview markdown={draft} />
-          </div>
-        </div>
+          <PageEditor markdown={resume.markdown} saving={saving} onSave={saveEdit} onCancel={() => setMode('view')} />
+        </>
       )}
     </Modal>
   );

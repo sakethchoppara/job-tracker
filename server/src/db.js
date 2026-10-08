@@ -56,13 +56,23 @@ db.exec(`
     tailored_edited INTEGER NOT NULL DEFAULT 0,
     analysis TEXT,  -- JSON: stage 1 recruiter analysis
     tailoring TEXT, -- JSON: stage 2 + 3 notes and code-verified checks
+    cover_letter TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS jobs_user ON jobs (user_id, status, position);
 `);
 
-export const STATUSES = ['saved', 'applied', 'screening', 'interviewing', 'offer', 'rejected'];
+// Columns added after the first release.
+if (!db.prepare('PRAGMA table_info(jobs)').all().some((c) => c.name === 'cover_letter')) {
+  db.exec('ALTER TABLE jobs ADD COLUMN cover_letter TEXT');
+}
+
+export const STATUSES = ['saved', 'applied', 'mail_received', 'accepted', 'interview', 'offer', 'hired', 'rejected'];
+
+// Statuses renamed after the first release; closest equivalents for existing rows.
+db.prepare("UPDATE jobs SET status = 'mail_received' WHERE status = 'screening'").run();
+db.prepare("UPDATE jobs SET status = 'interview' WHERE status = 'interviewing'").run();
 
 const now = () => new Date().toISOString();
 
@@ -118,7 +128,7 @@ export function serializeJob(row) {
 
 const UPDATABLE = new Set([
   'title', 'company', 'description', 'experience', 'location', 'url', 'notes', 'status', 'position',
-  'ai_status', 'ai_stage', 'ai_error', 'ai_filled', 'tailored_markdown', 'tailored_edited', 'analysis', 'tailoring',
+  'ai_status', 'ai_stage', 'ai_error', 'ai_filled', 'tailored_markdown', 'tailored_edited', 'analysis', 'tailoring', 'cover_letter',
 ]);
 
 export function updateJob(id, fields) {

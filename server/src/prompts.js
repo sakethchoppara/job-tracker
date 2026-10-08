@@ -129,6 +129,27 @@ Return JSON with exactly these keys:
 }`;
 }
 
+export const COVER_SYSTEM = `You write cover letters that hiring managers actually read: specific, warm, confident, and short.
+
+${TRUTH_RULES}
+
+Format: plain text only, no Markdown and no address block or date. Start with the salutation (use "Dear Hiring Manager,"
+unless a name appears in the job description), then 3-4 short paragraphs, 250-350 words in total, then
+"Sincerely," and the candidate's name. Paragraphs are separated by a blank line.
+Open with a specific reason this role at this company fits you. Never open with "I am writing...", "I am excited/eager/thrilled..." or any sentence that only states interest. Tie 2-3 concrete achievements from the
+resume to the job's top requirements. Never repeat the resume as a list.
+Unlike the resume, the letter never contains placeholders: never copy bracketed text such as "[metric: ...]" from the
+resume, and when a number is missing, describe the achievement without one. Return only the letter.`;
+
+export function coverPrompt({ job, resume, instructions }) {
+  return `Write my cover letter for this job.
+
+${jobBlock(job)}
+
+${resumeBlock('MY RESUME', resume)}
+${instructions ? `\nADDITIONAL INSTRUCTIONS FROM ME (follow unless they conflict with the truthfulness rules):\n${instructions}\n` : ''}`;
+}
+
 export const EXTRACT_SYSTEM = `You extract structured details from job descriptions. Respond with a single JSON object and nothing else.`;
 
 export function extractPrompt(job) {

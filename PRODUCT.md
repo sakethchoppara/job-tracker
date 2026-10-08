@@ -23,7 +23,7 @@ Truthfulness is enforced in two ways. Metrics the resume doesn't support become 
 ## Operating Context
 - The user pastes in a job description, then reviews the analysis.
 - Before accepting, the user can add notes to steer the rewrite. Afterwards they edit or download the tailored resume (PDF, DOCX, MD).
-- Applications move across six statuses by drag and drop: Saved, Applied, Screening, Interviewing, Offer, Rejected.
+- Applications move across eight statuses by drag and drop: Saved, Applied, Mail received, Accepted, Interview, Offer, Hired, Rejected.
 - The user returns repeatedly over weeks of a job search.
 
 ## Capabilities and Constraints

@@ -3,7 +3,9 @@ import {
   STATUSES, db, getJobRow, getResume, getUserJob, insertJob, serializeJob, updateJob,
 } from '../db.js';
 import { checkResume, startProcessing } from '../jobProcessor.js';
-import { renderDocx, renderPdf } from '../resumeFormat.js';
+import { completeText, stripFences } from '../llm.js';
+import { COVER_SYSTEM, coverPrompt } from '../prompts.js';
+import { renderDocx, renderLetterDocx, renderLetterPdf, renderPdf } from '../resumeFormat.js';
 
 const router = Router();
 export const FORMATS = ['pdf', 'docx', 'md'];
@@ -124,6 +126,42 @@ router.get('/:id/resume.:format', async (req, res) => {
   if (!row.tailored_markdown) return res.status(404).json({ error: 'No tailored resume for this job yet' });
   const name = row.tailored_markdown.match(/^#\s+(.+)$/m)?.[1] || 'Resume';
   await sendResume(res, row.tailored_markdown, req.params.format, `${name} ${row.company} Resume`);
+});
+
+// Cover letter: written from the tailored resume when there is one, else the base resume.
+router.post('/:id/cover-letter', async (req, res) => {
+  const row = findJob(req, res);
+  if (!row) return;
+  const base = getResume(req.user.id);
+  if (!base) return res.status(400).json({ error: 'Upload your resume first' });
+  const resume = row.tailored_markdown || base.markdown;
+  const letter = stripFences(await completeText(COVER_SYSTEM, coverPrompt({ job: row, resume, instructions: clean(req.body?.instructions) }), { maxTokens: 2000 }));
+  if (letter.length < 200) return res.status(502).json({ error: 'The AI returned an empty cover letter. Try again.' });
+  res.json(serializeJob(updateJob(row.id, { cover_letter: letter })));
+});
+
+router.put('/:id/cover-letter', (req, res) => {
+  const row = findJob(req, res);
+  if (!row) return;
+  const text = clean(req.body?.text);
+  if (!text) return res.status(400).json({ error: 'Cover letter cannot be empty' });
+  res.json(serializeJob(updateJob(row.id, { cover_letter: text })));
+});
+
+router.get('/:id/cover-letter.:format', async (req, res) => {
+  if (!['pdf', 'docx', 'txt'].includes(req.params.format)) return res.status(400).json({ error: 'Unsupported format' });
+  const row = findJob(req, res);
+  if (!row) return;
+  if (!row.cover_letter) return res.status(404).json({ error: 'No cover letter for this job yet' });
+  const { structured } = getResume(req.user.id) || { structured: {} };
+  const header = { name: structured.name, contact: (structured.contact || []).join(' | ') };
+  const filename = `${`${header.name || ''} ${row.company} Cover Letter`.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_')}.${req.params.format}`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  if (req.params.format === 'pdf') return res.type('application/pdf').send(await renderLetterPdf(row.cover_letter, header));
+  if (req.params.format === 'docx') {
+    return res.type('application/vnd.openxmlformats-officedocument.wordprocessingml.document').send(await renderLetterDocx(row.cover_letter, header));
+  }
+  res.type('text/plain').send(row.cover_letter);
 });
 
 export default router;

@@ -159,6 +159,37 @@ const toRuns = (text, extra = {}) => inlineRuns(text).map(
   (r) => new TextRun({ text: r.text, bold: r.bold || extra.bold, italics: extra.italics, size: extra.size ?? 21, color: extra.color, font: FONT }),
 );
 
+// Cover letters: plain paragraphs under a header taken from the resume (name, contact line) and today's date.
+const letterDate = () => new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const letterParagraphs = (text) => String(text).split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, ' ').trim()).filter(Boolean);
+
+export function renderLetterPdf(text, { name, contact }) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ size: 'LETTER', margins: { top: 64, bottom: 64, left: 72, right: 72 } });
+    const chunks = [];
+    doc.on('data', (c) => chunks.push(c));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+    const width = doc.page.width - 144;
+    if (name) doc.font('Helvetica-Bold').fontSize(16).fillColor('#111111').text(pdfSafe(name), { width });
+    if (contact) doc.font('Helvetica').fontSize(9.5).fillColor('#555555').text(pdfSafe(contact), { width });
+    doc.moveDown(1.5).font('Helvetica').fontSize(10.5).fillColor('#111111').text(letterDate(), { width }).moveDown(1.2);
+    for (const p of letterParagraphs(text)) doc.text(pdfSafe(p), { width, lineGap: 2.5 }).moveDown(0.8);
+    doc.end();
+  });
+}
+
+export function renderLetterDocx(text, { name, contact }) {
+  const para = (t, opts = {}) => new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: t, font: FONT, size: 22, ...opts })] });
+  const children = [
+    ...(name ? [new Paragraph({ children: [new TextRun({ text: name, bold: true, size: 32, font: FONT })] })] : []),
+    ...(contact ? [para(contact, { size: 19, color: '555555' })] : []),
+    para(letterDate()),
+    ...letterParagraphs(text).map((p) => para(p)),
+  ];
+  return Packer.toBuffer(new Document({ sections: [{ properties: { page: { margin: { top: 1080, bottom: 1080, left: 1440, right: 1440 } } }, children }] }));
+}
+
 export function renderDocx(md) {
   const children = parseResume(md).map((b) => {
     switch (b.type) {
@@ -186,6 +217,11 @@ export function renderDocx(md) {
     sections: [{ properties: { page: { margin: { top: 720, bottom: 720, left: 900, right: 900 } } }, children }],
   });
   return Packer.toBuffer(doc);
+}
+
+/** Pages the downloaded PDF will have: render it exactly as the download does and count page objects. */
+export async function countPdfPages(md) {
+  return ((await renderPdf(md)).toString('latin1').match(/\/Type \/Page\b(?!s)/g) || []).length;
 }
 
 // Case-insensitive keyword presence with boundaries that tolerate C++, C#, .NET, Node.js etc.

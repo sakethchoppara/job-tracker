@@ -17,9 +17,11 @@ async function request(path, { method = 'GET', body } = {}) {
 export const STATUSES = [
   { id: 'saved', label: 'Saved', color: '#64748b' },
   { id: 'applied', label: 'Applied', color: '#0ea5e9' },
-  { id: 'screening', label: 'Screening', color: '#8b5cf6' },
-  { id: 'interviewing', label: 'Interviewing', color: '#f59e0b' },
-  { id: 'offer', label: 'Offer', color: '#10b981' },
+  { id: 'mail_received', label: 'Mail received', color: '#8b5cf6' },
+  { id: 'accepted', label: 'Accepted', color: '#14b8a6' },
+  { id: 'interview', label: 'Interview', color: '#f59e0b' },
+  { id: 'offer', label: 'Offer', color: '#84cc16' },
+  { id: 'hired', label: 'Hired', color: '#10b981' },
   { id: 'rejected', label: 'Rejected', color: '#f43f5e' },
 ];
 
@@ -39,9 +41,13 @@ export const api = {
   tailor: (id, instructions) => request(`/jobs/${id}/tailor`, { method: 'POST', body: { instructions } }),
   saveTailored: (id, markdown) => request(`/jobs/${id}/resume`, { method: 'PUT', body: { markdown } }),
   jobResumeUrl: (id, format) => `/api/jobs/${id}/resume.${format}`,
+  writeCoverLetter: (id, instructions) => request(`/jobs/${id}/cover-letter`, { method: 'POST', body: { instructions } }),
+  saveCoverLetter: (id, text) => request(`/jobs/${id}/cover-letter`, { method: 'PUT', body: { text } }),
+  coverLetterUrl: (id, format) => `/api/jobs/${id}/cover-letter.${format}`,
 
   getResume: () => request('/resume'),
   importResume: (formData) => request('/resume/import', { method: 'POST', body: formData }),
   saveResume: (markdown) => request('/resume', { method: 'PUT', body: { markdown } }),
+  pageCount: (markdown) => request('/resume/page-count', { method: 'POST', body: { markdown } }),
   baseResumeUrl: (format) => `/api/resume/download.${format}`,
 };

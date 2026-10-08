@@ -5,7 +5,7 @@ import Logo from './Logo.jsx';
 // Illustrative only: shows the board's shape on the sign-in screen. Labelled as an example in the UI.
 const EXAMPLE = [
   { status: 'Applied', color: '#0ea5e9', cards: [{ title: 'Backend Engineer', company: 'Example Co', score: 71, state: 'Review analysis', action: true }] },
-  { status: 'Interviewing', color: '#f59e0b', cards: [{ title: 'Platform Engineer', company: 'Sample Labs', score: 84, state: 'Resume ready' }] },
+  { status: 'Interview', color: '#f59e0b', cards: [{ title: 'Platform Engineer', company: 'Sample Labs', score: 84, state: 'Resume ready' }] },
   { status: 'Offer', color: '#10b981', cards: [{ title: 'Data Engineer', company: 'Demo Inc', score: 90, state: 'Resume ready' }] },
 ];
 

@@ -46,9 +46,11 @@ colors:
   tone-ok-dark: "#fbbf24"
   status-saved: "#64748b"
   status-applied: "#0ea5e9"
-  status-screening: "#8b5cf6"
-  status-interviewing: "#f59e0b"
-  status-offer: "#10b981"
+  status-mail-received: "#8b5cf6"
+  status-accepted: "#14b8a6"
+  status-interview: "#f59e0b"
+  status-offer: "#84cc16"
+  status-hired: "#10b981"
   status-rejected: "#f43f5e"
   paper: "#ffffff"
   paper-ink: "#111111"
@@ -180,7 +182,7 @@ components:
 
 **Creative North Star: "Refined Glass"**
 
-A professional tool, not a showpiece. The board has Linear's density and the material polish of macOS and visionOS. Glass is what the chrome is made of: a floating top bar, six full-height lanes and a side sheet. Each is a neutral frosted pane over one cool, single-tone backdrop lit softly from above. Colour is reserved for the things that need the user. Everything else stays in three greys of ink.
+A professional tool, not a showpiece. The board has Linear's density and the material polish of macOS and visionOS. Glass is what the chrome is made of: a floating top bar, eight full-height lanes and a side sheet. Each is a neutral frosted pane over one cool, single-tone backdrop lit softly from above. Colour is reserved for the things that need the user. Everything else stays in three greys of ink.
 
 The system replaces an earlier "status is light" world (lanes tinted in rainbow hues, light pools behind each lane, an ink-coloured primary pill), which the user rejected as looking vibecoded. Nothing from that world survives except the brand mark. Neither theme is secondary: light and dark are both full token sets, chosen by a System/Light/Dark switch. An inline script in `index.html` applies the choice before first paint.
 
@@ -210,7 +212,7 @@ Cool neutrals with a single blue voice. Every hue on screen has to justify why i
 ### Semantic
 - **Error Red** (`error` / `error-dark`, CSS `--low`): failed AI steps, form errors, error notices, the danger button's text, and the analysis's red-flag icons.
 - **Score Tones** (`tone-good`, `tone-ok`, `error`): used only on the 48px score figure in the analysis sheet. Thresholds are ≥75, ≥50, and below 50. The card's score number stays `ink-2`.
-- **Status Hues** (`status-*`): six hues defined in `api.js`, painted only on the 7px lane dot.
+- **Status Hues** (`status-*`): eight hues defined in `api.js`, painted only on the 7px lane dot.
 
 ### Named Rules
 **The One Voice Rule.** Blue means "act here" or "this is live". Never use it for decoration, headings or idle state.

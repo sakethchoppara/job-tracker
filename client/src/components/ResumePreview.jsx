@@ -1,5 +1,5 @@
 // Mirrors server/src/resumeFormat.js parseResume so the preview matches the downloaded PDF.
-function parse(md) {
+export function parse(md) {
   const blocks = [];
   let beforeSection = true;
   for (const raw of String(md || '').split(/\r?\n/)) {

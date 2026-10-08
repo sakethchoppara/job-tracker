@@ -4,60 +4,271 @@
   "title": "Design System: Job Tracker",
   "extensions": {
     "colorMeta": {
-      "primary": { "role": "primary", "displayName": "System Blue", "canonical": "#0b63ce", "tonalRamp": ["#04213f", "#073566", "#0a4a90", "#0b63ce", "#3c86e0", "#74a9ea", "#aecbf3", "#e2edfb"] },
-      "primary-dark": { "role": "primary", "displayName": "System Blue (dark)", "canonical": "#4d9bff" },
-      "backdrop": { "role": "neutral", "displayName": "Cool Mist", "canonical": "#dde3eb", "tonalRamp": ["#0e131c", "#232b38", "#3e4858", "#5f6a7c", "#8792a3", "#b2bac6", "#dde3eb", "#f3f5f8"] },
-      "backdrop-dark": { "role": "neutral", "displayName": "Night Mist", "canonical": "#0e131c" },
-      "ink": { "role": "neutral", "displayName": "Deep Ink", "canonical": "#0f1726" },
-      "ink-2": { "role": "neutral", "displayName": "Slate Ink", "canonical": "#444e60" },
-      "ink-3": { "role": "neutral", "displayName": "Quiet Ink", "canonical": "#5c6577" },
-      "glass": { "role": "neutral", "displayName": "Frost", "canonical": "rgba(255, 255, 255, 0.52)" },
-      "glass-strong": { "role": "neutral", "displayName": "Dense Frost", "canonical": "rgba(247, 249, 252, 0.9)" },
-      "surface": { "role": "neutral", "displayName": "Card Surface", "canonical": "rgba(255, 255, 255, 0.82)" },
-      "line": { "role": "neutral", "displayName": "Hairline", "canonical": "rgba(15, 23, 38, 0.09)" },
-      "error": { "role": "semantic", "displayName": "Error Red", "canonical": "#be123c", "tonalRamp": ["#3d0614", "#640a21", "#8f0f2f", "#be123c", "#d6496a", "#e57f97", "#f1b4c2", "#fbe5ea"] },
-      "tone-good": { "role": "semantic", "displayName": "Score Good (figure only)", "canonical": "#047857" },
-      "tone-ok": { "role": "semantic", "displayName": "Score Fair (figure only)", "canonical": "#a16207" },
-      "status-saved": { "role": "semantic", "displayName": "Saved dot", "canonical": "#64748b" },
-      "status-applied": { "role": "semantic", "displayName": "Applied dot", "canonical": "#0ea5e9" },
-      "status-screening": { "role": "semantic", "displayName": "Screening dot", "canonical": "#8b5cf6" },
-      "status-interviewing": { "role": "semantic", "displayName": "Interviewing dot", "canonical": "#f59e0b" },
-      "status-offer": { "role": "semantic", "displayName": "Offer dot", "canonical": "#10b981" },
-      "status-rejected": { "role": "semantic", "displayName": "Rejected dot", "canonical": "#f43f5e" },
-      "paper": { "role": "neutral", "displayName": "Resume Paper", "canonical": "#ffffff" }
+      "status-saved": {
+        "role": "semantic",
+        "displayName": "Saved dot",
+        "canonical": "#64748b"
+      },
+      "status-applied": {
+        "role": "semantic",
+        "displayName": "Applied dot",
+        "canonical": "#0ea5e9"
+      },
+      "status-mail-received": {
+        "role": "semantic",
+        "displayName": "Mail received dot",
+        "canonical": "#8b5cf6"
+      },
+      "status-accepted": {
+        "role": "semantic",
+        "displayName": "Accepted dot",
+        "canonical": "#14b8a6"
+      },
+      "status-interview": {
+        "role": "semantic",
+        "displayName": "Interview dot",
+        "canonical": "#f59e0b"
+      },
+      "status-offer": {
+        "role": "semantic",
+        "displayName": "Offer dot",
+        "canonical": "#84cc16"
+      },
+      "status-hired": {
+        "role": "semantic",
+        "displayName": "Hired dot",
+        "canonical": "#10b981"
+      },
+      "status-rejected": {
+        "role": "semantic",
+        "displayName": "Rejected dot",
+        "canonical": "#f43f5e"
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "System Blue",
+        "canonical": "#0b63ce",
+        "tonalRamp": [
+          "#04213f",
+          "#073566",
+          "#0a4a90",
+          "#0b63ce",
+          "#3c86e0",
+          "#74a9ea",
+          "#aecbf3",
+          "#e2edfb"
+        ]
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "System Blue (dark)",
+        "canonical": "#4d9bff"
+      },
+      "backdrop": {
+        "role": "neutral",
+        "displayName": "Cool Mist",
+        "canonical": "#dde3eb",
+        "tonalRamp": [
+          "#0e131c",
+          "#232b38",
+          "#3e4858",
+          "#5f6a7c",
+          "#8792a3",
+          "#b2bac6",
+          "#dde3eb",
+          "#f3f5f8"
+        ]
+      },
+      "backdrop-dark": {
+        "role": "neutral",
+        "displayName": "Night Mist",
+        "canonical": "#0e131c"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Deep Ink",
+        "canonical": "#0f1726"
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#444e60"
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Quiet Ink",
+        "canonical": "#5c6577"
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Frost",
+        "canonical": "rgba(255, 255, 255, 0.52)"
+      },
+      "glass-strong": {
+        "role": "neutral",
+        "displayName": "Dense Frost",
+        "canonical": "rgba(247, 249, 252, 0.9)"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Card Surface",
+        "canonical": "rgba(255, 255, 255, 0.82)"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(15, 23, 38, 0.09)"
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Error Red",
+        "canonical": "#be123c",
+        "tonalRamp": [
+          "#3d0614",
+          "#640a21",
+          "#8f0f2f",
+          "#be123c",
+          "#d6496a",
+          "#e57f97",
+          "#f1b4c2",
+          "#fbe5ea"
+        ]
+      },
+      "tone-good": {
+        "role": "semantic",
+        "displayName": "Score Good (figure only)",
+        "canonical": "#047857"
+      },
+      "tone-ok": {
+        "role": "semantic",
+        "displayName": "Score Fair (figure only)",
+        "canonical": "#a16207"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Resume Paper",
+        "canonical": "#ffffff"
+      }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "The auth intro headline only." },
-      "figure": { "displayName": "Score Figure", "purpose": "The 48px analysis score; the only toned type." },
-      "headline": { "displayName": "Headline", "purpose": "Auth and onboarding card headings." },
-      "title": { "displayName": "Title", "purpose": "Sheet titles." },
-      "card-title": { "displayName": "Card Title", "purpose": "Job titles on cards." },
-      "body": { "displayName": "Body", "purpose": "Base text, 14px / 1.45." },
-      "label": { "displayName": "Label", "purpose": "Form labels, counts, secondary meta." },
-      "mono": { "displayName": "Mono", "purpose": "Markdown editor and placeholder codes." },
-      "paper": { "displayName": "Paper", "purpose": "Resume preview; mirrors the pdfkit PDF." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "The auth intro headline only."
+      },
+      "figure": {
+        "displayName": "Score Figure",
+        "purpose": "The 48px analysis score; the only toned type."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Auth and onboarding card headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sheet titles."
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "Job titles on cards."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base text, 14px / 1.45."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels, counts, secondary meta."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Markdown editor and placeholder codes."
+      },
+      "paper": {
+        "displayName": "Paper",
+        "purpose": "Resume preview; mirrors the pdfkit PDF."
+      }
     },
     "shadows": [
-      { "name": "pane", "value": "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 1px rgba(15,23,38,0.04), 0 10px 30px -14px rgba(15,23,38,0.22)", "purpose": "Top bar, lanes, auth card: edge highlight plus soft drop." },
-      { "name": "rest", "value": "0 1px 1px rgba(15,23,38,0.05)", "purpose": "Cards at rest." },
-      { "name": "lift", "value": "0 2px 4px rgba(15,23,38,0.08), 0 22px 44px -16px rgba(15,23,38,0.35)", "purpose": "The dragged card only." },
-      { "name": "segment", "value": "0 1px 2px rgba(15,23,38,0.14)", "purpose": "Active segment in segmented controls." },
-      { "name": "paper", "value": "0 1px 2px rgba(0,0,0,0.08), 0 16px 36px -20px rgba(15,23,38,0.45)", "purpose": "Resume paper." },
-      { "name": "blur-pane", "value": "blur(24px) saturate(140%)", "purpose": "backdrop-filter for panes and lanes; write unprefixed only." },
-      { "name": "blur-sheet", "value": "blur(44px) saturate(140%)", "purpose": "backdrop-filter for the side sheet." },
-      { "name": "blur-drag", "value": "blur(18px) saturate(160%)", "purpose": "backdrop-filter for the dragged card." }
+      {
+        "name": "pane",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.9), 0 1px 1px rgba(15,23,38,0.04), 0 10px 30px -14px rgba(15,23,38,0.22)",
+        "purpose": "Top bar, lanes, auth card: edge highlight plus soft drop."
+      },
+      {
+        "name": "rest",
+        "value": "0 1px 1px rgba(15,23,38,0.05)",
+        "purpose": "Cards at rest."
+      },
+      {
+        "name": "lift",
+        "value": "0 2px 4px rgba(15,23,38,0.08), 0 22px 44px -16px rgba(15,23,38,0.35)",
+        "purpose": "The dragged card only."
+      },
+      {
+        "name": "segment",
+        "value": "0 1px 2px rgba(15,23,38,0.14)",
+        "purpose": "Active segment in segmented controls."
+      },
+      {
+        "name": "paper",
+        "value": "0 1px 2px rgba(0,0,0,0.08), 0 16px 36px -20px rgba(15,23,38,0.45)",
+        "purpose": "Resume paper."
+      },
+      {
+        "name": "blur-pane",
+        "value": "blur(24px) saturate(140%)",
+        "purpose": "backdrop-filter for panes and lanes; write unprefixed only."
+      },
+      {
+        "name": "blur-sheet",
+        "value": "blur(44px) saturate(140%)",
+        "purpose": "backdrop-filter for the side sheet."
+      },
+      {
+        "name": "blur-drag",
+        "value": "blur(18px) saturate(160%)",
+        "purpose": "backdrop-filter for the dragged card."
+      }
     ],
     "motion": [
-      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Presses (scale 0.97 buttons, 0.94 icons, 0.985 cards), 160ms." },
-      { "name": "ease-drawer", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Sheet slide-in from 28px, 320ms; the longest motion allowed." },
-      { "name": "state", "value": "150ms ease", "purpose": "Colour and border transitions." },
-      { "name": "drop-target", "value": "200ms ease", "purpose": "Lane glass swap to glass-strong while dragged over." }
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Presses (scale 0.97 buttons, 0.94 icons, 0.985 cards), 160ms."
+      },
+      {
+        "name": "ease-drawer",
+        "value": "cubic-bezier(0.32, 0.72, 0, 1)",
+        "purpose": "Sheet slide-in from 28px, 320ms; the longest motion allowed."
+      },
+      {
+        "name": "state",
+        "value": "150ms ease",
+        "purpose": "Colour and border transitions."
+      },
+      {
+        "name": "drop-target",
+        "value": "200ms ease",
+        "purpose": "Lane glass swap to glass-strong while dragged over."
+      }
     ],
     "breakpoints": [
-      { "name": "aside-stack", "value": "1100px" },
-      { "name": "single-column", "value": "860px" },
-      { "name": "mobile", "value": "720px" },
-      { "name": "narrow", "value": "420px" }
+      {
+        "name": "aside-stack",
+        "value": "1100px"
+      },
+      {
+        "name": "single-column",
+        "value": "860px"
+      },
+      {
+        "name": "mobile",
+        "value": "720px"
+      },
+      {
+        "name": "narrow",
+        "value": "420px"
+      }
     ]
   },
   "components": [
@@ -139,12 +350,36 @@
       "The resume renders as white Helvetica paper in both themes."
     ],
     "rules": [
-      { "name": "The One Voice Rule", "body": "Blue means \"act here\" or \"this is live\". Never use it for decoration, headings or idle state.", "section": "colors" },
-      { "name": "The Spent-Only-Where-Needed Rule", "body": "Tone colours belong to the score figure, status hues belong to the dot, and red belongs to failures. If a hue appears anywhere else, it is a defect.", "section": "colors" },
-      { "name": "The Tabular Rule", "body": "Counts, scores and tallies always use `font-variant-numeric: tabular-nums`.", "section": "typography" },
-      { "name": "The Lifted Pane Rule", "body": "This is the signature interaction. A card being dragged turns into its own glass pane (`glass`, `blur(18px) saturate(160%)`, Lift shadow, scale 1.02) and floats over the board.", "section": "elevation" },
-      { "name": "The Unstacked Lane Rule", "body": "The lane's glass lives on a `::before` layer at `z-index: -1`. The lane itself must never create a stacking context: no `z-index`, `transform`, `filter`, `opacity < 1` or `backdrop-filter` on it. Otherwise the fixed-position dragged card gets trapped in the lane or painted under later lanes.", "section": "elevation" },
-      { "name": "The Fallback Rule", "body": "When reduced transparency is requested, `--glass` falls back to `--glass-strong` and backdrop blur is removed from panes, lanes and the dragged card. When `backdrop-filter` is unsupported, `--glass` also becomes `--glass-strong`. The glass must still read as solid surfaces in both cases.", "section": "elevation" }
+      {
+        "name": "The One Voice Rule",
+        "body": "Blue means \"act here\" or \"this is live\". Never use it for decoration, headings or idle state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Spent-Only-Where-Needed Rule",
+        "body": "Tone colours belong to the score figure, status hues belong to the dot, and red belongs to failures. If a hue appears anywhere else, it is a defect.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Counts, scores and tallies always use `font-variant-numeric: tabular-nums`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lifted Pane Rule",
+        "body": "This is the signature interaction. A card being dragged turns into its own glass pane (`glass`, `blur(18px) saturate(160%)`, Lift shadow, scale 1.02) and floats over the board.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Unstacked Lane Rule",
+        "body": "The lane's glass lives on a `::before` layer at `z-index: -1`. The lane itself must never create a stacking context: no `z-index`, `transform`, `filter`, `opacity < 1` or `backdrop-filter` on it. Otherwise the fixed-position dragged card gets trapped in the lane or painted under later lanes.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Fallback Rule",
+        "body": "When reduced transparency is requested, `--glass` falls back to `--glass-strong` and backdrop blur is removed from panes, lanes and the dragged card. When `backdrop-filter` is unsupported, `--glass` also becomes `--glass-strong`. The glass must still read as solid surfaces in both cases.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do spend System Blue only on primary actions, \"needs you\" or live states, focus and selection.",

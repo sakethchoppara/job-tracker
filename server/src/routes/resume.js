@@ -3,6 +3,7 @@ import multer from 'multer';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { getResume, getResumePdf, saveResume } from '../db.js';
 import { completeText, stripFences } from '../llm.js';
+import { countPdfPages } from '../resumeFormat.js';
 import { CONVERT_SYSTEM } from '../prompts.js';
 import { FORMATS, sendResume } from './jobs.js';
 
@@ -40,6 +41,12 @@ router.put('/', (req, res) => {
   const markdown = req.body?.markdown?.trim();
   if (!markdown) return res.status(400).json({ error: 'Resume cannot be empty' });
   res.json(saveResume(req.user.id, { markdown }));
+});
+
+// Live page count for the editor: the same renderer as the PDF download.
+router.post('/page-count', async (req, res) => {
+  const markdown = String(req.body?.markdown || '');
+  res.json({ pages: markdown.trim() ? await countPdfPages(markdown) : 0 });
 });
 
 router.get('/original.pdf', (req, res) => {
