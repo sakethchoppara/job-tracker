@@ -14,11 +14,6 @@
         "displayName": "Applied dot",
         "canonical": "#0ea5e9"
       },
-      "status-mail-received": {
-        "role": "semantic",
-        "displayName": "Mail received dot",
-        "canonical": "#8b5cf6"
-      },
       "status-accepted": {
         "role": "semantic",
         "displayName": "Accepted dot",

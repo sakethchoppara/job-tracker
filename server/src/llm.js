@@ -1,7 +1,6 @@
 // LLM agents: an abstract Agent holds everything provider-independent (schema-validated JSON with one corrective
 // retry, friendly quota errors); each subclass only knows how to send one request to its provider.
-// Picked by LLM_PROVIDER (claude-code | anthropic | gemini), else by whichever API key is set, else Claude Code.
-import { spawn } from 'node:child_process';
+// Picked by LLM_PROVIDER (claude-agent-sdk | anthropic | gemini), else by whichever API key is set, else the Agent SDK.
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -75,60 +74,66 @@ export class Agent {
   }
 }
 
-/** Runs the local `claude` CLI headless, on the user's Claude subscription; no API key needed. */
-export class ClaudeCodeAgent extends Agent {
+/**
+ * Claude via the Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`), which runs the Claude Code engine in-process
+ * on whatever login is on this machine. Each call is isolated: no tools beyond Read for a PDF, no filesystem
+ * settings, hooks or MCP servers, and no saved session. Structured output uses the SDK's json_schema output format.
+ */
+export class ClaudeAgentSdkAgent extends Agent {
   static TIMEOUT_MS = 5 * 60 * 1000;
 
   async request(system, prompt, { jsonSchema, pdf }) {
-    // Isolated run: no tools beyond reading the PDF, no user/project settings or hooks, no MCP servers, no saved session.
-    const args = [
-      '-p', '--output-format', 'json', '--model', this.model, '--system-prompt', system,
-      '--no-session-persistence', '--setting-sources', '', '--strict-mcp-config', '--tools', pdf ? 'Read' : '',
-    ];
-    if (jsonSchema) args.push('--json-schema', JSON.stringify(jsonSchema));
+    const { query } = await import('@anthropic-ai/claude-agent-sdk');
+    // `env` replaces the subprocess environment. Drop the markers Claude Code sets for its own children (so this
+    // works when the server was started from inside Claude Code) and ANTHROPIC_API_KEY, which would bill that API
+    // account instead of the machine's Claude login.
+    const { CLAUDECODE, CLAUDE_CODE_ENTRYPOINT, ANTHROPIC_API_KEY, ...env } = process.env;
     const dir = await mkdtemp(path.join(tmpdir(), 'job-tracker-'));
+    const abortController = new AbortController();
+    const timer = setTimeout(() => abortController.abort(), ClaudeAgentSdkAgent.TIMEOUT_MS);
     try {
       let input = prompt;
       if (pdf) {
         const file = path.join(dir, 'document.pdf');
         await writeFile(file, pdf);
-        args.push('--add-dir', dir, '--allowedTools', 'Read');
         input = `${prompt}\n\nThe document is the PDF at ${file}. Read it with the Read tool.`;
       }
-      const res = JSON.parse(await runCli('claude', args, input, dir));
-      if (res.is_error) {
-        throw Object.assign(new Error(`Claude Code: ${res.result || res.subtype || 'request failed'}`), { status: res.api_error_status });
+      let result;
+      for await (const message of query({
+        prompt: input,
+        options: {
+          model: this.model,
+          systemPrompt: system,
+          cwd: dir,
+          tools: pdf ? ['Read'] : [],
+          allowedTools: pdf ? ['Read'] : [],
+          settingSources: [],
+          mcpServers: {},
+          strictMcpConfig: true,
+          persistSession: false,
+          maxTurns: 6,
+          env,
+          abortController,
+          ...(jsonSchema ? { outputFormat: { type: 'json_schema', schema: jsonSchema } } : {}),
+        },
+      })) {
+        if (message.type === 'result') result = message;
       }
-      if (res.stop_reason === 'max_tokens') throw cutOff();
-      return jsonSchema && res.structured_output ? JSON.stringify(res.structured_output) : res.result;
+      if (!result) throw new Error('Claude Agent SDK returned no result');
+      if (result.subtype !== 'success' || result.is_error) {
+        const detail = result.subtype === 'success' ? result.result : (result.errors || []).join('; ') || result.subtype;
+        throw Object.assign(new Error(`Claude Agent SDK: ${detail || 'request failed'}`), { status: result.api_error_status });
+      }
+      if (result.stop_reason === 'max_tokens') throw cutOff();
+      return jsonSchema && result.structured_output != null ? JSON.stringify(result.structured_output) : result.result;
+    } catch (err) {
+      if (abortController.signal.aborted) throw new Error('Claude Agent SDK timed out');
+      throw err;
     } finally {
+      clearTimeout(timer);
       await rm(dir, { recursive: true, force: true });
     }
   }
-}
-
-function runCli(cmd, args, input, cwd) {
-  return new Promise((resolve, reject) => {
-    // Drop the markers Claude Code sets for its own child processes, so the CLI also runs when the server
-    // was started from inside a Claude Code session. Also hide ANTHROPIC_API_KEY (it may be in .env for the
-    // anthropic provider): the CLI would bill that API account instead of the user's Claude subscription.
-    const { CLAUDECODE, CLAUDE_CODE_ENTRYPOINT, ANTHROPIC_API_KEY, ...env } = process.env;
-    const child = spawn(cmd, args, { cwd, env, timeout: ClaudeCodeAgent.TIMEOUT_MS });
-    let out = '';
-    let err = '';
-    child.stdout.on('data', (d) => { out += d; });
-    child.stderr.on('data', (d) => { err += d; });
-    child.on('error', (e) => reject(e.code === 'ENOENT'
-      ? new Error('Claude Code CLI not found. Install it and run `claude` once to log in, or pick another LLM_PROVIDER.')
-      : e));
-    child.on('close', (code, signal) => {
-      if (code === 0) return resolve(out);
-      // With --output-format json, failures still print a JSON result on stdout; let the caller read it.
-      if (out.trim().startsWith('{')) return resolve(out);
-      reject(new Error(signal ? `Claude Code timed out (${signal})` : `Claude Code exited with code ${code}: ${err.trim() || out.trim()}`));
-    });
-    child.stdin.end(input);
-  });
 }
 
 export class AnthropicAgent extends Agent {
@@ -178,7 +183,8 @@ export class GeminiAgent extends Agent {
 }
 
 const AGENTS = {
-  'claude-code': { Agent: ClaudeCodeAgent, model: 'sonnet' },
+  'claude-agent-sdk': { Agent: ClaudeAgentSdkAgent, model: 'sonnet' },
+  'claude-code': { Agent: ClaudeAgentSdkAgent, model: 'sonnet' }, // older name for the same provider
   anthropic: { Agent: AnthropicAgent, model: 'claude-sonnet-5-5' },
   gemini: { Agent: GeminiAgent, model: 'gemini-2.5-flash' },
 };
@@ -188,7 +194,7 @@ function resolveProvider() {
   if (explicit) return explicit;
   if (process.env.ANTHROPIC_API_KEY) return 'anthropic';
   if (process.env.GEMINI_API_KEY) return 'gemini';
-  return 'claude-code';
+  return 'claude-agent-sdk';
 }
 
 export function llmInfo() {

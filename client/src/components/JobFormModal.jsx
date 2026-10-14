@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { STATUSES, api } from '../api.js';
+import { api } from '../api.js';
 import Modal from './Modal.jsx';
 
-const EMPTY = { title: '', company: '', description: '', experience: '', location: '', url: '', status: 'saved' };
+const EMPTY = { title: '', company: '', description: '', experience: '', location: '', url: '', status: '' };
 
-export default function JobFormModal({ onClose, onCreated }) {
-  const [form, setForm] = useState(EMPTY);
+export default function JobFormModal({ statuses, onClose, onCreated }) {
+  const [form, setForm] = useState({ ...EMPTY, status: statuses[0]?.id || '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -55,7 +55,7 @@ export default function JobFormModal({ onClose, onCreated }) {
           <label><span className="label-row">Job link <span className="muted">(optional)</span></span><input type="url" value={form.url} onChange={set('url')} placeholder="https://…" /></label>
           <label>Status
             <select value={form.status} onChange={set('status')}>
-              {STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+              {statuses.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </label>
         </div>

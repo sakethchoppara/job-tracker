@@ -226,9 +226,15 @@ export async function countPdfPages(md) {
 
 // Case-insensitive keyword presence with boundaries that tolerate C++, C#, .NET, Node.js etc.
 export function hasKeyword(text, keyword) {
-  const escaped = keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '[\\s-]+');
-  if (!escaped) return false;
+  let k = keyword.trim();
+  // Singular and plural both count ("relational database" for "Relational databases", "APIs" for "API"); lowercase
+  // endings only, so "AWS" stays exact.
+  const plural = /[a-z0-9]$/i.test(k) ? 's?' : '';
+  if (/[a-z]s$/.test(k)) k = k.slice(0, -1);
+  const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '[\\s-]+') + plural;
+  if (!k) return false;
   // "C" must not match inside "C++" / "C#".
   const after = /[a-z0-9]$/i.test(keyword.trim()) ? '(?![a-z0-9+#])' : '(?![a-z0-9])';
-  return new RegExp(`(?<![a-z0-9])${escaped}${after}`, 'i').test(text);
+  // Bold/italic markers must not break a phrase: "**CI/CD** pipelines" contains "CI/CD pipelines".
+  return new RegExp(`(?<![a-z0-9])${escaped}${after}`, 'i').test(String(text).replace(/\*/g, ''));
 }

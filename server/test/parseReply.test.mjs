@@ -7,6 +7,11 @@ const valid = {
   score: 62, verdict: 'Solid base.',
   missing_keywords: [{ keyword: 'AWS', why: 'Required.' }],
   red_flags: [{ flag: 'No metrics', why: 'Tasks, not results.', fix: 'Add outcomes.' }],
+  keywords: [{ keyword: 'AWS', importance: 'must', where: 'First Experience bullet' }],
+  outcomes: ['Ship reliable APIs'],
+  weak_lines: [{ line: 'Worked on APIs', code: 'VAGUE', fix: 'Say which and what changed.' }],
+  missing_sections: [],
+  top_change: 'Add metrics.',
   extracted: { experience: null, location: 'Remote' },
 };
 

@@ -1,14 +1,37 @@
 import {
   Check, ExternalLink, FileDown, Flag, LoaderCircle, PencilLine, RotateCw, Trash2, X,
 } from 'lucide-react';
-import { useState } from 'react';
-import { STATUSES, api } from '../api.js';
+import { useEffect, useState } from 'react';
+import { api, uncoveredKeywords } from '../api.js';
 import { AiStatus } from './JobCard.jsx';
 import Modal from './Modal.jsx';
+import CoachPanel from './CoachPanel.jsx';
 import PageEditor from './PageEditor.jsx';
 import ResumePreview from './ResumePreview.jsx';
+import { EmailEvent } from './MailModal.jsx';
+import ProjectsTab from './ProjectsTab.jsx';
+import PanelTab from './PanelTab.jsx';
+import InterviewTab from './InterviewTab.jsx';
 
 const FIELDS = ['title', 'company', 'experience', 'location', 'url', 'description', 'notes'];
+
+function JobEmails({ job, onChange, statuses }) {
+  const [emails, setEmails] = useState(null);
+  const load = () => api.jobEmails(job.id).then(setEmails).catch(() => setEmails([]));
+  useEffect(() => { load(); }, [job.id, job.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!emails?.length) return null;
+  const undo = async (ev) => {
+    const { job: updated } = await api.undoMailMove(ev.id);
+    onChange(updated);
+    load();
+  };
+  return (
+    <section className="job-emails">
+      <h3 className="section-title">Emails</h3>
+      <ul className="email-list">{emails.map((ev) => <EmailEvent key={ev.id} ev={ev} onUndo={undo} statuses={statuses} />)}</ul>
+    </section>
+  );
+}
 
 function DetailsTab({ job, onChange, onDelete }) {
   const [edits, setEdits] = useState({});
@@ -72,8 +95,11 @@ function DetailsTab({ job, onChange, onDelete }) {
 const STAGES = [
   { id: 'analyze', label: 'Recruiter analysis' },
   { id: 'rewrite', label: 'Rewrite experience (XYZ)' },
-  { id: 'skim', label: 'ATS & 10-second skim pass' },
+  { id: 'skim', label: 'ATS skim & human-voice pass' },
+  { id: 'check', label: 'Keyword-by-keyword check' },
 ];
+
+const CODE_LABELS = { NO_METRIC: 'No metric', PASSIVE: 'Passive', VAGUE: 'Vague', NO_PROOF: 'No proof', DUPLICATE: 'Duplicate', DATED: 'Dated' };
 
 function useAction(onChange) {
   const [busy, setBusy] = useState(false);
@@ -135,6 +161,7 @@ function AnalysisTab({ job, hasResume, onChange, onTailored }) {
   const tailoringBusy = job.ai_status === 'processing';
   return (
     <div className="analysis">
+
       {job.ai_status === 'error' && <div className="form-error">Last run failed: {job.ai_error}</div>}
       <div className="analysis-head">
         <p className={`score-figure ${tone}`}><strong>{a.score}</strong><span>/100</span></p>
@@ -163,6 +190,53 @@ function AnalysisTab({ job, hasResume, onChange, onTailored }) {
           </ul>
         </section>
       </div>
+      {a.keywords?.length > 0 && (
+        <section className="analysis-more">
+          <h4>What the screener scans for</h4>
+          <div className="table-wrap">
+            <table className="kw-table">
+              <thead><tr><th scope="col">Keyword</th><th scope="col">Priority</th><th scope="col">In your resume</th><th scope="col">Where it goes</th></tr></thead>
+              <tbody>
+                {a.keywords.map((k) => (
+                  <tr key={k.keyword}>
+                    <td><strong>{k.keyword}</strong></td>
+                    <td><span className={`verdict ${k.importance === 'must' ? 'bad' : ''}`}>{k.importance === 'must' ? 'Must-have' : 'Nice-to-have'}</span></td>
+                    <td>{k.in_resume ? <><Check size={13} strokeWidth={2.5} aria-hidden="true" /> Yes</> : <span className="muted">No</span>}</td>
+                    <td className="small">{k.where}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+      {(a.outcomes?.length > 0 || a.weak_lines?.length > 0) && (
+        <div className="analysis-grid">
+          {a.weak_lines?.length > 0 && (
+            <section>
+              <h4>Lines that get you screened out</h4>
+              <ul className="flag-list">
+                {a.weak_lines.map((w) => (
+                  <li key={w.line}>
+                    <span><span className="verdict mid">{CODE_LABELS[w.code] || w.code}</span> <q className="small">{w.line}</q></span>
+                    <span className="small muted">Fix: {w.fix}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <section>
+            {a.outcomes?.length > 0 && (
+              <>
+                <h4>What this role is hired to produce</h4>
+                <ol className="small outcome-list">{a.outcomes.map((o) => <li key={o}>{o}</li>)}</ol>
+              </>
+            )}
+            {a.top_change && <><h4>The one change that helps most</h4><p className="small">{a.top_change}</p></>}
+            {a.missing_sections?.length > 0 && <><h4>Sections a recruiter can’t find</h4><p className="small">{a.missing_sections.join(', ')}</p></>}
+          </section>
+        </div>
+      )}
       <div className="accept-box">
         <textarea rows={2} value={instructions} onChange={(e) => setInstructions(e.target.value)}
           aria-label="Notes for the rewrite (optional)"
@@ -170,7 +244,7 @@ function AnalysisTab({ job, hasResume, onChange, onTailored }) {
         <div className="actions-row">
           <button className="btn" disabled={busy || tailoringBusy} onClick={() => run(() => api.analyze(job.id))}><RotateCw size={15} strokeWidth={1.75} />Re-analyze</button>
           <span className="spacer" />
-          <span className="muted small accept-hint">Rewrites your experience with these keywords in the XYZ formula, then runs an ATS and skim pass.</span>
+          <span className="muted small accept-hint">Rewrites your experience with these keywords in the XYZ formula, runs an ATS skim and human-voice pass, then checks every keyword.</span>
           <button className="btn primary" disabled={busy || tailoringBusy}
             onClick={() => {
               if (job.tailored_edited && !window.confirm('This replaces your manual edits to the tailored resume. Continue?')) return;
@@ -189,7 +263,20 @@ function TailoringNotes({ t }) {
   if (!t) return null;
   const included = t.keyword_check.filter((k) => k.included).length;
   return (
-    <aside className="insights">
+    <div className="notes">
+      {t.check && (
+        <>
+          <h4>Match against the posting <span className="tally">{t.check.score}/100</span></h4>
+          <ul className="note-list small check-list">
+            {t.check.keywords.map((k) => (
+              <li key={k.keyword}>
+                <span><span className={`verdict ${k.status === 'covered' ? 'good' : k.status === 'weak' ? 'mid' : 'bad'}`}>{k.status}</span> <strong>{k.keyword}</strong></span>
+                {k.status !== 'covered' && k.fix && <span className="muted">{k.fix}</span>}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
       <h4>Missing keywords now included <span className="tally">{included}/{t.keyword_check.length}</span></h4>
       <div className="kw-list">
         {t.keyword_check.map((k) => (
@@ -210,12 +297,32 @@ function TailoringNotes({ t }) {
           <ul className="note-list small">{t.skipped_sections.map((s) => <li key={s.section}><strong>{s.section}</strong><span>{s.reason}</span><span className="muted">Fixed: {s.fix}</span></li>)}</ul>
         </>
       )}
+      {t.before_after?.length > 0 && (
+        <>
+          <h4>Biggest changes, before → after</h4>
+          <ul className="note-list small">{t.before_after.map((b) => <li key={b.before}><span className="muted"><s>{b.before}</s></span><span>{b.after}</span></li>)}</ul>
+        </>
+      )}
       {(t.rewrite_changes?.length > 0 || t.skim_changes?.length > 0) && (
         <>
           <h4>What changed</h4>
           <ul className="small">{[...(t.rewrite_changes || []), ...(t.skim_changes || [])].map((c) => <li key={c}>{c}</li>)}</ul>
         </>
       )}
+    </div>
+  );
+}
+
+function ResumeSide({ job, onChange }) {
+  const [view, setView] = useState('coach');
+  return (
+    <aside className="insights side">
+      <div className="tabs" role="tablist" aria-label="Resume helpers">
+        {[['coach', 'Coach'], ['notes', 'Notes']].map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'active' : ''} onClick={() => setView(id)}>{label}</button>
+        ))}
+      </div>
+      {view === 'coach' ? <CoachPanel job={job} onChange={onChange} /> : <TailoringNotes t={job.tailoring} />}
     </aside>
   );
 }
@@ -272,7 +379,7 @@ function ResumeTab({ job, onChange, goToAnalysis }) {
       {error && <div className="form-error">{error}</div>}
       <div className="resume-layout">
         <ResumePreview markdown={job.tailored_markdown} />
-        <TailoringNotes t={job.tailoring} />
+        <ResumeSide job={job} onChange={onChange} />
       </div>
     </div>
   );
@@ -353,7 +460,7 @@ function CoverLetterTab({ job, hasResume, onChange }) {
   );
 }
 
-export default function JobDetailModal({ job, hasResume, onClose, onChange, onDelete }) {
+export default function JobDetailModal({ statuses, job, hasResume, onClose, onChange, onDelete }) {
   const [tab, setTab] = useState(job.tailored_markdown ? 'resume' : 'analysis');
   const statusSelect = (
     <select
@@ -362,7 +469,7 @@ export default function JobDetailModal({ job, hasResume, onClose, onChange, onDe
       value={job.status}
       onChange={async (e) => onChange(await api.updateJob(job.id, { status: e.target.value }))}
     >
-      {STATUSES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+      {statuses.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
     </select>
   );
 
@@ -370,17 +477,26 @@ export default function JobDetailModal({ job, hasResume, onClose, onChange, onDe
     <Modal wide title={job.title} subtitle={job.company} onClose={onClose} headerExtra={statusSelect}>
       <div className="detail-head">
         <div className="tabs" role="tablist" aria-label="Application views">
-          {[['analysis', 'Analysis'], ['resume', 'Tailored resume'], ['cover', 'Cover letter'], ['details', 'Details']].map(([id, label]) => (
+          {[['analysis', 'Analysis'], ['resume', 'Tailored resume'], ['panel', 'Hiring panel'], ['interview', 'Interview practice'], ['cover', 'Cover letter'], ['projects', 'Projects'], ['details', 'Details']].map(([id, label]) => (
             <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
         <span className="spacer" />
         <AiStatus job={job} />
       </div>
+      {tab !== 'projects' && !job.project && job.ai_status !== 'processing' && uncoveredKeywords(job).length > 0 && (
+        <div className="notice info project-nudge">
+          <span>{uncoveredKeywords(job).length} skill{uncoveredKeywords(job).length === 1 ? '' : 's'} in this job {uncoveredKeywords(job).length === 1 ? 'isn’t' : 'aren’t'} on your resume: {uncoveredKeywords(job).join(', ')}.</span>
+          <button className="link" onClick={() => setTab('projects')}>Build a portfolio project</button>
+        </div>
+      )}
       {tab === 'analysis' && <AnalysisTab job={job} hasResume={hasResume} onChange={onChange} onTailored={() => setTab('resume')} />}
       {tab === 'resume' && <ResumeTab job={job} onChange={onChange} goToAnalysis={() => setTab('analysis')} />}
       {tab === 'cover' && <CoverLetterTab job={job} hasResume={hasResume} onChange={onChange} />}
-      {tab === 'details' && <DetailsTab job={job} onChange={onChange} onDelete={onDelete} />}
+      {tab === 'panel' && <PanelTab job={job} hasResume={hasResume} onChange={onChange} />}
+      {tab === 'interview' && <InterviewTab job={job} hasResume={hasResume} />}
+      {tab === 'projects' && <ProjectsTab job={job} onJobChange={onChange} />}
+      {tab === 'details' && <><JobEmails job={job} onChange={onChange} statuses={statuses} /><DetailsTab job={job} onChange={onChange} onDelete={onDelete} /></>}
     </Modal>
   );
 }

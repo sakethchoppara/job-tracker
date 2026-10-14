@@ -1,12 +1,80 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { Plus } from 'lucide-react';
-import { STATUSES, api } from '../api.js';
+import { Plus, X } from 'lucide-react';
+import { useState } from 'react';
+import { STATUS_COLORS, api } from '../api.js';
 import JobCard from './JobCard.jsx';
 
 const byPosition = (a, b) => a.position - b.position || a.id - b.id;
 
-export default function Board({ jobs, allJobs, setJobs, onOpen, onError, reload, onNew, filtered }) {
-  const columns = Object.fromEntries(STATUSES.map((s) => [s.id, jobs.filter((j) => j.status === s.id).sort(byPosition)]));
+function AddStatus({ statuses, onAdded, onError }) {
+  const unused = STATUS_COLORS.find((c) => !statuses.some((s) => s.color === c)) || STATUS_COLORS[0];
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState('');
+  const [color, setColor] = useState(unused);
+  const [after, setAfter] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  // New lanes default to just before Rejected, the usual end of the line.
+  const defaultAfter = statuses.at(-1)?.id === 'rejected' && statuses.length > 1 ? statuses.at(-2).id : statuses.at(-1)?.id;
+  const start = () => { setLabel(''); setColor(unused); setAfter(defaultAfter || ''); setOpen(true); };
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      onAdded(await api.addStatus(label, color, after));
+      setOpen(false);
+    } catch (err) {
+      onError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button className="lane-add" onClick={start} aria-label="Add status" title="Add status">
+        <Plus size={16} strokeWidth={1.75} />
+      </button>
+    );
+  }
+  return (
+    <form className="lane lane-add-form form" onSubmit={submit}>
+      <label>Status name
+        <input autoFocus value={label} maxLength={30} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Phone screen" required />
+      </label>
+      <fieldset className="swatches">
+        <legend>Colour</legend>
+        {STATUS_COLORS.map((c) => (
+          <label key={c} className="swatch" style={{ '--swatch': c }}>
+            <input type="radio" name="status-color" value={c} checked={color === c} onChange={() => setColor(c)} aria-label={c} />
+          </label>
+        ))}
+      </fieldset>
+      <label>Place after
+        <select value={after} onChange={(e) => setAfter(e.target.value)}>
+          {statuses.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+        </select>
+      </label>
+      <div className="actions-row">
+        <button type="button" className="btn" onClick={() => setOpen(false)}>Cancel</button>
+        <button className="btn primary" disabled={busy || !label.trim()}>{busy ? 'Adding…' : 'Add status'}</button>
+      </div>
+    </form>
+  );
+}
+
+export default function Board({ statuses, setStatuses, jobs, allJobs, setJobs, onOpen, onError, reload, onNew, filtered }) {
+  const columns = Object.fromEntries(statuses.map((s) => [s.id, jobs.filter((j) => j.status === s.id).sort(byPosition)]));
+  const totals = Object.fromEntries(statuses.map((s) => [s.id, allJobs.filter((j) => j.status === s.id).length]));
+
+  const remove = async (status) => {
+    if (!window.confirm(`Remove the “${status.label}” status?`)) return;
+    try {
+      setStatuses(await api.removeStatus(status.id));
+    } catch (err) {
+      onError(err.message);
+    }
+  };
 
   const onDragEnd = async ({ source, destination, draggableId }) => {
     if (!destination) return;
@@ -14,7 +82,7 @@ export default function Board({ jobs, allJobs, setJobs, onOpen, onError, reload,
 
     const id = Number(draggableId);
     // Work on the full (unfiltered) column lists so hidden cards keep their place.
-    const full = Object.fromEntries(STATUSES.map((s) => [s.id, allJobs.filter((j) => j.status === s.id).sort(byPosition)]));
+    const full = Object.fromEntries(statuses.map((s) => [s.id, allJobs.filter((j) => j.status === s.id).sort(byPosition)]));
     const moved = full[source.droppableId].find((j) => j.id === id);
     full[source.droppableId] = full[source.droppableId].filter((j) => j.id !== id);
 
@@ -39,13 +107,18 @@ export default function Board({ jobs, allJobs, setJobs, onOpen, onError, reload,
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <main className="board">
-        {STATUSES.map((status) => (
+      <main className="board" style={{ '--lanes': statuses.length }}>
+        {statuses.map((status) => (
           <section className="lane" key={status.id} style={{ '--lane': status.color }} aria-label={status.label}>
             <header className="lane-head">
               <span className="lane-dot" aria-hidden="true" />
               <h2>{status.label}</h2>
               <span className="count">{columns[status.id].length}</span>
+              {totals[status.id] === 0 && statuses.length > 1 && (
+                <button className="icon-btn sm lane-remove" onClick={() => remove(status)} aria-label={`Remove the ${status.label} status`} title="Remove status">
+                  <X size={14} strokeWidth={1.75} />
+                </button>
+              )}
             </header>
             <Droppable droppableId={status.id}>
               {(provided, snapshot) => (
@@ -89,6 +162,7 @@ export default function Board({ jobs, allJobs, setJobs, onOpen, onError, reload,
             </Droppable>
           </section>
         ))}
+        <AddStatus statuses={statuses} onAdded={setStatuses} onError={onError} />
       </main>
     </DragDropContext>
   );
